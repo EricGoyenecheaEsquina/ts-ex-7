@@ -1,12 +1,9 @@
-import { stringify } from "querystring";
-
 export class InvalidInputError extends Error {
   constructor(message: string) {
     super()
     this.message = message || 'Invalid Input'
   }
 }
-const directions: string[] = ['north', 'east', 'south', 'west']
 type Direction = 'north' | 'east' | 'south' | 'west'
 type Coordinates = [number, number]
 export class Robot {
@@ -19,47 +16,87 @@ export class Robot {
     return this.coords;
   }
   place(robot: { x: number; y: number; direction: string }) {
-    if (robot.direction != 'north' && robot.direction != 'east' && robot.direction != 'south' && robot.direction != 'west') {
-      throw new InvalidInputError("No valido");;
+    switch (robot.direction) {
+      case 'north':
+        this.direction = 'north';
+        break;
+      case 'west':
+        this.direction = 'west';
+        break;
+      case 'east':
+        this.direction = 'east';
+        break;
+      case 'south':
+        this.direction = 'south';
+        break;
+      default:
+        throw new InvalidInputError("no valido");
     }
     this.direction = robot.direction as Direction;
     this.coords = [robot.x, robot.y];
   }
+  advance(direction: Direction){
+    switch (direction) {
+      case 'north':
+        this.coords[1]++;
+        break;
+      case 'east':
+        this.coords[0]++;
+        break;
+      case 'south':
+        this.coords[1]--;
+        break;
+      case 'west':
+        this.coords[0]--;
+        break;
+    }
+  }
+  turn(facing:Direction,direction:string){
+    if(direction=='R'){
+      switch(facing){
+        case 'north':
+        this.direction='east';
+        break;
+      case 'east':
+        this.direction='south';
+        break;
+      case 'south':
+        this.direction='west';
+        break;
+      case 'west':
+        this.direction='north';
+        break;
+      }
+    }else{
+      switch(facing){
+        case 'north':
+        this.direction='west';
+        break;
+      case 'east':
+        this.direction='north';
+        break;
+      case 'south':
+        this.direction='east';
+        break;
+      case 'west':
+        this.direction='south';
+        break;
+      }
+    }
+  }
+
   evaluate(instructions: string) {
     let i: number = 0;
-    let letra: string;
     for (i; i < instructions.length; i++) {
-      letra = instructions[i];
-      switch (letra) {
+      switch (instructions[i]) {
         case 'R':
-          if (this.direction == 'west') {
-            this.direction = directions[0] as Direction;
-          } else {
-            this.direction = directions[directions.indexOf(this.direction) + 1] as Direction;
-          }
+          this.turn(this.direction,'R');
           break;
         case 'L':
-          if (this.direction == 'north') {
-            this.direction = directions[3] as Direction;
-          } else {
-            this.direction = directions[directions.indexOf(this.direction) - 1] as Direction;
-          }
+          this.turn(this.direction,'L');
           break;
         case 'A':
-          switch (this.direction) {
-            case 'north':
-              this.coords[1] +=1
-              break;
-            case 'east':
-              this.coords[0]+=1
-              break;
-            case 'south':
-              this.coords[1] -= 1;
-              break;
-            case 'west':
-              this.coords[0] -= 1
-              break;
-          }
+          this.advance(this.direction);
           break;
       }
     }
